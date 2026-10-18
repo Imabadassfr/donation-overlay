@@ -199,7 +199,7 @@ async function Poll() {
       Drain();
     }
   } catch (E) { window.PollStatus = `fetch failed: ${E.message}`; }
-  setTimeout(Poll, 2000);
+  setTimeout(Poll, 5000);
 }
 
 if (Demo) {
