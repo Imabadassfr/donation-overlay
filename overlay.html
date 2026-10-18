@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 <style>
-  /* Tokens from the Simply DONATIONS design system. Gotham SSm is Roblox's face; Montserrat is its listed fallback. */
   :root {
     --font-sans: "Gotham SSm", "Montserrat", system-ui, sans-serif;
     --primary: #56FF0E; --primary-light: #AAFF86; --primary-deep: #2FFF00; --money: #18A956;
@@ -17,7 +16,6 @@
     --card-sunset-1: #FF5050; --card-sunset-2: #FFC890; --card-sunset-3: #FFED85; --card-sunset-stroke: #D47604;
     --surface: #FFFFFF; --row-stroke: #DCDCDC; --ink: #0F223C; --on-color: #FFFFFF;
     --radius-toast: 30px; --radius-pill: 9999px;
-    --radius-inner: 15px; /* toast radius minus the card padding, so the message row sits concentric inside it */
     --space-default: 10px; --space-card: 12px; --space-section: 15px;
   }
   html, body { margin: 0; background: transparent; overflow: hidden; font-family: var(--font-sans); }
@@ -34,7 +32,6 @@
     background: linear-gradient(45deg, var(--c), var(--c-light), var(--c-deep));
     opacity: 0; transform: translateY(-40px) scale(.82);
   }
-  /* Colours per donation level, from the game's DonationEffects.LevelColors (base) with a gloss and a deep stop. */
   #Card { --c: #3EFF30; --c-light: #A8FF9F; --c-deep: #22D914; --c-stroke: #18A956; }
   #Card.L3 { --c: #FFB300; --c-light: #FFE08A; --c-deep: #E08A00; --c-stroke: #B36B00; }
   #Card.L4 { --c: #00C8FF; --c-light: #8CEBFF; --c-deep: #0083D6; --c-stroke: #0069B0; }
@@ -42,7 +39,6 @@
   #Card.L6 { --c: #FF0064; --c-light: #FF7AA8; --c-deep: #C70050; --c-stroke: #99003C; }
   #Card.L7 { --c: #FF0000; --c-light: #FF8A8A; --c-deep: #C40000; --c-stroke: #8F0000; }
 
-  /* Faint tiled pattern + one gloss sweep on entry. */
   #Card::before {
     content: ""; position: absolute; inset: 0; opacity: .14;
     background: radial-gradient(circle, #fff 1.6px, transparent 2.2px) 0 0 / 18px 18px;
@@ -73,8 +69,8 @@
   @keyframes Bump { from { transform: scale(.6); } to { transform: scale(1); } }
 
   #Message {
-    position: relative; margin-top: var(--space-default); padding: var(--space-card) var(--space-section);
-    border-radius: var(--radius-inner); border: 1px solid var(--row-stroke); background: var(--surface);
+    position: relative; margin-top: var(--space-default); padding: var(--space-card) 24px;
+    border-radius: var(--radius-pill); border: 1px solid var(--row-stroke); background: var(--surface);
     color: var(--ink); font-weight: 700; font-size: 22px; line-height: 30px; overflow-wrap: anywhere;
   }
   #Message:empty { display: none; }
@@ -96,7 +92,6 @@
   </div>
 </div>
 <script>
-// Hosted next to the `tts` edge function. Set once when deploying this page.
 const ApiBase = "https://ojtbstbzwmhpqvdimimt.supabase.co/functions/v1/tts";
 
 const Query = new URLSearchParams(location.search);
@@ -104,10 +99,10 @@ const UserId = Query.get("user");
 const Key = Query.get("key");
 const TtsOn = Query.get("tts") === "true";
 const MinAmount = Number(Query.get("minAmount")) || 0;
-const MaxLength = Number(Query.get("maxLength")) || 200; // characters of the message that get read aloud
+const MaxLength = Number(Query.get("maxLength")) || 200;
 const VoiceName = Query.get("voice");
 const Volume = Math.min(1, Math.max(0, Number(Query.get("volume") ?? 1)));
-const Demo = Query.get("demo") === "1"; // preview the popup tiers without a real donation
+const Demo = Query.get("demo") === "1";
 const ShowSeconds = 6;
 
 const Card = document.getElementById("Card");
@@ -121,7 +116,6 @@ let LastId = null;
 
 function Sleep(Ms) { return new Promise((R) => setTimeout(R, Ms)); }
 
-// Server-generated audio first (same sound in OBS on every OS); browser voices only if that fails.
 function SpeakAudio(Text) {
   return new Promise((Resolve, Reject) => {
     const Url = new URL(ApiBase + "/speech");
@@ -157,7 +151,6 @@ function SpeakBrowser(Text) {
   });
 }
 
-// Same thresholds as the game's DonationEffects.GetLevel; level 1-2 (under 5) share the green.
 function TierFor(Amount) {
   if (Amount >= 10000) return "L7";
   if (Amount >= 1000) return "L6";
@@ -173,7 +166,7 @@ async function Play(Event) {
   AmountEl.textContent = `R$ ${Event.amount.toLocaleString()}`;
   Message.textContent = Text;
   Card.className = TierFor(Event.amount);
-  void Card.offsetWidth; // restart the animation for back-to-back donations
+  void Card.offsetWidth;
   Card.classList.add("Show");
 
   const Spoken = Speak(Event.amount >= MinAmount
@@ -205,7 +198,7 @@ async function Poll() {
       Queue.push(...Data.events);
       Drain();
     }
-  } catch (E) { window.PollStatus = `fetch failed: ${E.message}`; /* network blip; retry next tick */ }
+  } catch (E) { window.PollStatus = `fetch failed: ${E.message}`; }
   setTimeout(Poll, 2000);
 }
 
